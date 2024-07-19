@@ -6,13 +6,31 @@ import data from "./data";
 
 const Accordion = () => {
   const [selected, setSelected] = useState(null);
+  const [enableMultiSelection, setEnableMultiSelection] = useState(false);
+  const [multiple, setMultiple] = useState([]);
+
   const handleSingleSelection = (getCurrentId) => {
-    setSelected(getCurrentId === selected ? null : getCurrentId);
+    if (enableMultiSelection) {
+      if (multiple.includes(getCurrentId)) {
+        setMultiple(multiple.filter(id => id !== getCurrentId));
+      } else {
+        setMultiple([...multiple, getCurrentId]);
+      }
+    } else {
+      setSelected(getCurrentId === selected ? null : getCurrentId);
+    }
   };
-  console.log(selected);
+
+  const toggleEnableMultiSelection = () => {
+    setEnableMultiSelection(!enableMultiSelection);
+  };
+
+  console.log(selected, multiple);
   return (
-    <div className="w-full h-screen flex flex-col justify-center items-center">
+    <div className="w-full h-screen flex flex-col justify-center items-center gap-8 ">
+      <button onClick={toggleEnableMultiSelection} className="bg-slate-600 text-white py-3 px-3 rounded-md hover:bg-gray-500 font-bold cursor-pointer " >{enableMultiSelection ? 'Disable' : 'Enable'} Multi Selection</button>
       <div className="wrapper bg-gray-100 p-4 rounded-lg shadow max-w-[600px] mx-auto">
+
         <div className="accordian">
           {data && data.length > 0 ? (
             data.map((dataItem) => (
@@ -23,18 +41,34 @@ const Accordion = () => {
                 >
                   <h3 className="text-lg font-semibold">{dataItem.question}</h3>
                   <span className="text-xl font-bold">
-                    {selected === dataItem.id ? (
-                      <HiMinusCircle />
+                    {enableMultiSelection ? (
+                      multiple.includes(dataItem.id) ? (
+                        <HiMinusCircle />
+                      ) : (
+                        <HiPlusCircle />
+                      )
                     ) : (
-                      <HiPlusCircle />
+                      selected === dataItem.id ? (
+                        <HiMinusCircle />
+                      ) : (
+                        <HiPlusCircle />
+                      )
                     )}
                   </span>
                 </div>
-                {selected === dataItem.id ? (
-                  <div className="content p-4 bg-gray-200 rounded-lg mt-2">
-                    <p className="text-sm text-gray-700">{dataItem.answer}</p>
-                  </div>
-                ) : null}
+                {enableMultiSelection ? (
+                  multiple.includes(dataItem.id) ? (
+                    <div className="content p-4 bg-gray-200 rounded-lg mt-2">
+                      <p className="text-sm text-gray-700">{dataItem.answer}</p>
+                    </div>
+                  ) : null
+                ) : (
+                  selected === dataItem.id ? (
+                    <div className="content p-4 bg-gray-200 rounded-lg mt-2">
+                      <p className="text-sm text-gray-700">{dataItem.answer}</p>
+                    </div>
+                  ) : null
+                )}
               </div>
             ))
           ) : (
